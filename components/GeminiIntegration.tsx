@@ -58,13 +58,13 @@ The JSON structure must be exactly:
           </button>
           
           <a
-            href="https://aistudio.google.com/"
+            href="https://gemini.google.com/app"
             target="_blank"
             rel="noreferrer"
             className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-cyan-500/20"
           >
             <ExternalLink size={18} />
-            Open Gemini / AI Studio
+            Open Gemini Chat
           </a>
         </div>
       </div>
