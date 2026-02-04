@@ -4,16 +4,22 @@ import { Copy, ExternalLink, Check } from 'lucide-react';
 export const GeminiIntegration: React.FC = () => {
   const [copied, setCopied] = useState(false);
 
-  const promptText = `Analyze the uploaded video for viral potential. Identify 3-5 segments that are highly engaging, have strong hooks, or contain complete, interesting thoughts. 
-  
+  const promptText = `Analyze the uploaded video for viral potential and behavioral engagement. 
+Identify 3-5 segments that:
+1. Have a high "Retenção Inicial" (strong hooks/curiosity).
+2. Generate a "Social Gap" (moments that naturally make people want to comment or ask questions).
+3. Contain complete, provocative thoughts that stand alone as a Short/Reel.
+
+For each segment, create a "Click-Ready" title and a description explaining why this will trigger engagement.
+
 Return strictly a JSON array with no markdown formatting, no code blocks, and no extra text. 
 The JSON structure must be exactly:
 [
   {
-    "title": "Catchy Title",
+    "title": "Viral Headline",
     "start": "MM:SS",
     "end": "MM:SS",
-    "description": "Why this part is viral"
+    "description": "Behavioral trigger: Why people will interact with this"
   }
 ]`;
 
