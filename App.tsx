@@ -208,51 +208,112 @@ export default function App() {
           </section>
         )}
 
-        {isExportModalOpen && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 max-w-2xl w-full shadow-2xl space-y-4">
+{isExportModalOpen && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 max-w-3xl w-full shadow-2xl space-y-6 my-8">
+              
+              {/* Header do Modal */}
               <div className="flex justify-between items-center border-b border-gray-700 pb-3">
                 <div className="flex items-center gap-2 text-indigo-400">
                   <Code2 size={22} />
-                  <h3 className="text-lg font-bold text-white">Payload de Exportação Premium</h3>
+                  <h3 className="text-lg font-bold text-white">Central de Exportação Nuvem (Google Colab)</h3>
                 </div>
-                <button onClick={() => setIsExportModalOpen(false)} className="text-gray-400 hover:text-white font-bold">✕</button>
+                <button onClick={() => setIsExportModalOpen(false)} className="text-gray-400 hover:text-white font-bold text-lg">✕</button>
               </div>
 
               <p className="text-sm text-gray-300">
-                Copie o JSON abaixo e cole na célula do seu notebook <strong>Processador de Vídeos do Gemini Viral Clipper</strong>.
+                Siga os passos abaixo para processar seus shorts na velocidade da nuvem usando o Google Colab gratuitamente.
               </p>
 
-              <div className="relative">
-                <pre className="bg-gray-950 p-4 rounded-xl overflow-x-auto text-xs text-green-400 max-h-64 border border-gray-900 font-mono select-all">
-                  {JSON.stringify({
-                    videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=InsiraOLink",
-                    cuts: clips.map((clip, index) => ({
-                      id: index + 1,
-                      title: clip.title,
-                      start: clip.start,
-                      end: clip.end
-                    }))
-                  }, null, 2)}
+              {/* PASSO 1: Instalação das Dependências */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Passo 1: Instalar Dependências no Colab</span>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText("!pip install yt-dlp moviepy");
+                      alert("Passo 1 copiado!");
+                    }}
+                    className="text-xs bg-gray-700 hover:bg-gray-600 text-cyan-400 px-2 py-1 rounded border border-gray-600 transition-colors"
+                  >
+                    📋 Copiar Comando
+                  </button>
+                </div>
+                <pre className="bg-gray-950 p-3 rounded-lg text-xs text-gray-300 font-mono border border-gray-900 overflow-x-auto">
+                  {"!pip install yt-dlp moviepy"}
                 </pre>
               </div>
+{/* PASSO 2: O Motor em Python com JSON Injetado */}
+<div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Passo 2: Código do Script de Corte (Crie uma nova célula)</span>
+                  <button
+                    onClick={() => {
+                      const pythonScript = `import json\nimport os\nimport re\nfrom moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip\n\n# ==========================================\n# 🚀 SEU JSON FOI GERADO E INJETADO AUTOMATICAMENTE AQUI\n# ==========================================\ndados_payload = """\n${JSON.stringify({
+                        videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=InsiraOLink",
+                        cuts: clips.map((clip, index) => ({
+                          id: index + 1,
+                          title: clip.title,
+                          start: clip.start,
+                          end: clip.end
+                        }))
+                      }, null, 2)}\n"""\n# ==========================================\n\nconfig = json.loads(dados_payload)\nurl_video = config["videoUrl"]\noutput_original = "/content/video_completo.mp4"\n\ndef para_segundos(tempo_str):\n    partes = list(map(int, tempo_str.split(':')))\n    if len(partes) == 3: return partes[0] * 3600 + partes[1] * 60 + partes[2]\n    return partes[0] * 60 + partes[1]\n\nif not os.path.exists(output_original):\n    print(f"📥 Baixando vídeo do YouTube...")\n    os.system(f'yt-dlp -f "best[ext=mp4]" -o "{output_original}" "{url_video}"')\n\nprint("\\n--- Iniciando os cortes automáticos ---")\nfor corte in config["cuts"]:\n    start_sec = para_segundos(corte["start"])\n    end_sec = para_segundos(corte["end"])\n    titulo_limpo = re.sub(r'[\\\\/*?:"<>|!]', "", corte["title"]).replace(" ", "_")\n    nome_arquivo = f"/content/Corte_{corte[\'id\']}_{titulo_limpo}.mp4"\n    print(f"Rendering: {nome_arquivo}...")\n    ffmpeg_extract_subclip(output_original, start_sec, end_sec, targetname=nome_arquivo)\n\nprint("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar.")`;
+                      navigator.clipboard.writeText(pythonScript);
+                      alert("Script Python Completo Copiado! Basta colar no Colab e rodar.");
+                    }}
+                    className="text-xs bg-gray-700 hover:bg-gray-600 text-cyan-400 px-2 py-1 rounded border border-gray-600 transition-colors"
+                  >
+                    📋 Copiar Script Python
+                  </button>
+                </div>
+                <div className="bg-gray-950 p-3 rounded-lg border border-gray-900 max-h-32 overflow-y-auto">
+                  <pre className="text-[11px] text-gray-400 font-mono leading-relaxed">
+                    {`import json
+import os
+# ... (Script Python Automatizado do Cortador)
+# Injeta os dados direto na variável para o usuário`}
+                  </pre>
+                </div>
+              </div>
+              
+              {/* PASSO 3: O Payload Dinâmico */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Passo 3: Seus Dados de Recorte (Crie um arquivo 'payload.json' ou cole no script)</span>
+                  <button
+                    onClick={handleCopyPayload}
+                    className={`text-xs px-3 py-1 rounded font-bold transition-all ${
+                      isCopied ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                    }`}
+                  >
+                    {isCopied ? '✅ Copiado!' : '📑 Copiar Meu JSON'}
+                  </button>
+                </div>
+                <div className="relative">
+                  <pre className="bg-gray-950 p-4 rounded-xl overflow-x-auto text-xs text-green-400 max-h-40 border border-gray-900 font-mono select-all">
+                    {JSON.stringify({
+                      videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=InsiraOLink",
+                      cuts: clips.map((clip, index) => ({
+                        id: index + 1,
+                        title: clip.title,
+                        start: clip.start,
+                        end: clip.end
+                      }))
+                    }, null, 2)}
+                  </pre>
+                </div>
+              </div>
 
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={handleCopyPayload}
-                  className={`flex-1 py-3 rounded-xl font-bold transition-all shadow-md ${
-                    isCopied ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                  }`}
-                >
-                  {isCopied ? '✅ Payload Copiado!' : '📑 Copiar Código JSON'}
-                </button>
+              {/* Rodapé do Modal */}
+              <div className="flex gap-3 pt-2 border-t border-gray-700">
                 <button
                   onClick={() => setIsExportModalOpen(false)}
-                  className="px-5 py-3 bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium rounded-xl transition-colors"
+                  className="w-full py-3 bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium rounded-xl transition-colors text-sm"
                 >
-                  Fechar
+                  Fechar Central de Exportação
                 </button>
               </div>
+
             </div>
           </div>
         )}
