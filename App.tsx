@@ -11,6 +11,30 @@ export default function App() {
   const [clips, setClips] = useState<ClipSegment[]>([]);
   const [parseError, setParseError] = useState<string | null>(null);
 
+  // --- COLE EXATAMENTE DAQUI PARA BAIXO ---
+  // Estados para o Payload Premium do Colab
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [youtubeUrlInput, setYoutubeUrlInput] = useState(''); // Estado para o Input do YouTube
+
+  // Função para copiar o Payload estruturado para a área de transferência
+  const handleCopyPayload = async () => {
+    const payload = {
+      videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=ciQOEETOSqc", // Usa o input ou o padrão de teste
+      cuts: clips.map((clip, index) => ({
+        id: index + 1,
+        title: clip.title,
+        start: clip.start,
+        end: clip.end
+      }))
+    };
+    
+    await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+  // --- ATÉ AQUI ---
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -110,6 +134,21 @@ export default function App() {
               <video src={videoUrl} controls className="w-full h-full object-contain" />
             </div>
           )}
+
+          {/* --- NOVO: Campo dinâmico para a URL do YouTube --- */}
+          <div className="mt-5 pt-4 border-t border-gray-700">
+            <label className="block text-sm font-medium text-gray-300 mb-2 text-left">
+              🔗 Link do Vídeo no YouTube (Necessário para o Processamento em Nuvem)
+            </label>
+            <input
+              type="text"
+              value={youtubeUrlInput}
+              onChange={(e) => setYoutubeUrlInput(e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=..."
+              className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm text-gray-300 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none font-mono"
+            />
+          </div>
+
         </section>
 
         {/* Step 2: Gemini Instructions */}
@@ -148,6 +187,76 @@ export default function App() {
             Force Parse JSON
           </button>
         </section>
+
+        {/* --- NOVO: Seção de Exportação Industrial e Modal do Mestre das Gambiarras --- */}
+        {clips.length > 0 && (
+          <section className="bg-gray-800 rounded-xl p-6 border border-gray-700 shadow-lg text-center">
+            <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2 justify-center">
+              <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 w-2 h-6 rounded-full"></span>
+              3. Exportação Industrial em Nuvem
+            </h2>
+            <p className="text-gray-400 text-sm mb-4">
+              Gere o código de processamento e envie os dados direto para o seu notebook do Google Colab.
+            </p>
+            
+            <button
+              onClick={() => setIsExportModalOpen(true)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:shadow-indigo-500/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 mx-auto"
+            >
+              🚀 Gerar Payload para Google Colab
+            </button>
+          </section>
+        )}
+
+        {isExportModalOpen && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 max-w-2xl w-full shadow-2xl space-y-4">
+              <div className="flex justify-between items-center border-b border-gray-700 pb-3">
+                <div className="flex items-center gap-2 text-indigo-400">
+                  <Code2 size={22} />
+                  <h3 className="text-lg font-bold text-white">Payload de Exportação Premium</h3>
+                </div>
+                <button onClick={() => setIsExportModalOpen(false)} className="text-gray-400 hover:text-white font-bold">✕</button>
+              </div>
+
+              <p className="text-sm text-gray-300">
+                Copie o JSON abaixo e cole na célula do seu notebook <strong>Processador de Vídeos do Gemini Viral Clipper</strong>.
+              </p>
+
+              <div className="relative">
+                <pre className="bg-gray-950 p-4 rounded-xl overflow-x-auto text-xs text-green-400 max-h-64 border border-gray-900 font-mono select-all">
+                  {JSON.stringify({
+                    videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=InsiraOLink",
+                    cuts: clips.map((clip, index) => ({
+                      id: index + 1,
+                      title: clip.title,
+                      start: clip.start,
+                      end: clip.end
+                    }))
+                  }, null, 2)}
+                </pre>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={handleCopyPayload}
+                  className={`flex-1 py-3 rounded-xl font-bold transition-all shadow-md ${
+                    isCopied ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                  }`}
+                >
+                  {isCopied ? '✅ Payload Copiado!' : '📑 Copiar Código JSON'}
+                </button>
+                <button
+                  onClick={() => setIsExportModalOpen(false)}
+                  className="px-5 py-3 bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium rounded-xl transition-colors"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* --- FIM DA INSERÇÃO --- */}
 
         {/* Step 4: Output */}
         <ClipList clips={clips} videoFile={videoFile} />
