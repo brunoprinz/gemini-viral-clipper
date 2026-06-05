@@ -267,15 +267,30 @@ export default function App() {
                   </button>
                 </div>
                 <div className="bg-gray-950 p-3 rounded-lg border border-gray-900 max-h-32 overflow-y-auto">
-                  <pre className="text-[11px] text-gray-400 font-mono leading-relaxed">
+                <pre className="text-[11px] text-gray-400 font-mono leading-relaxed text-left">
                     {`import json
 import os
-# ... (Script Python Automatizado do Cortador)
-# Injeta os dados direto na variável para o usuário`}
+import re
+from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+
+# Os dados dos seus shorts já vão injetados aqui!
+dados_payload = """ ... """
+
+config = json.loads(dados_payload)
+url_video = config["videoUrl"]
+output_original = "/content/video_completo.mp4"
+
+# Baixa do YouTube e faz os recortes automáticos
+if not os.path.exists(output_original):
+    os.system(f'yt-dlp -f "best[ext=mp4]" ...')
+
+for corte in config["cuts"]:
+    # Renderiza na pasta /content/ pronta para baixar
+    ffmpeg_extract_subclip(...)`}
                   </pre>
                 </div>
               </div>
-              
+
               {/* PASSO 3: O Payload Dinâmico */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
