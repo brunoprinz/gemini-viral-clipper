@@ -243,13 +243,13 @@ export default function App() {
                   {"!pip install yt-dlp moviepy"}
                 </pre>
               </div>
-{/* PASSO 2: O Motor em Python com JSON Injetado (Blindado para Cópia Manual) */}
+{/* PASSO 2: O Motor em Python com JSON Injetado (Blindado contra Arquivo Fantasma) */}
 <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Passo 2: Código do Script de Corte (Crie uma nova célula)</span>
                   <button
                     onClick={() => {
-                      const pythonScript = `import json\nimport os\nimport re\nfrom moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip\n\n# ==========================================\n# 🚀 SEU JSON FOI GERADO E INJETADO AUTOMATICAMENTE AQUI\n# ==========================================\ndados_payload = """\n${JSON.stringify({
+                      const pythonScript = `import json\nimport os\nimport re\nimport sys\nfrom moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip\n\n# ==========================================\n# 🚀 SEU JSON FOI GERADO E INJETADO AUTOMATICAMENTE AQUI\n# ==========================================\ndados_payload = """\n${JSON.stringify({
                         videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=InsiraOLink",
                         cuts: clips.map((clip, index) => ({
                           id: index + 1,
@@ -257,7 +257,7 @@ export default function App() {
                           start: clip.start,
                           end: clip.end
                         }))
-                      }, null, 2)}\n"""\n# ==========================================\n\nconfig = json.loads(dados_payload)\nurl_video = config["videoUrl"]\noutput_original = "/content/video_completo.mp4"\n\ndef para_segundos(tempo_str):\n    partes = list(map(int, tempo_str.split(':')))\n    if len(partes) == 3: return partes[0] * 3600 + partes[1] * 60 + partes[2]\n    return partes[0] * 60 + partes[1]\n\nif not os.path.exists(output_original):\n    print(f"📥 Baixando vídeo do YouTube...")\n    os.system(f'yt-dlp -f "best[ext=mp4]" -o "{output_original}" "{url_video}"')\n\nprint("\\n--- Iniciando os cortes automáticos ---")\nfor corte in config["cuts"]:\n    start_sec = para_segundos(corte["start"])\n    end_sec = para_segundos(corte["end"])\n    titulo_limpo = re.sub(r'[\\\\/*?:"<>|!]', "", corte["title"]).replace(" ", "_")\n    nome_arquivo = f"/content/Corte_{corte[\'id\']}_{titulo_limpo}.mp4"\n    print(f"Rendering: {nome_arquivo}...")\n    ffmpeg_extract_subclip(output_original, start_sec, end_sec, targetname=nome_arquivo)\n\nprint("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar.")`;
+                      }, null, 2)}\n"""\n# ==========================================\n\nconfig = json.loads(dados_payload)\nurl_video = config["videoUrl"]\noutput_original = "/content/video_completo.mp4"\n\ndef para_segundos(tempo_str):\n    partes = list(map(int, tempo_str.split(':')))\n    if len(partes) == 3: return partes[0] * 3600 + partes[1] * 60 + partes[2]\n    return partes[0] * 60 + partes[1]\n\n# Remove resquícios de arquivos quebrados antigos\nif os.path.exists(output_original):\n    os.remove(output_original)\n\nprint(f"📥 Baixando vídeo do YouTube...")\nstatus_download = os.system(f'yt-dlp -f "best[ext=mp4]" -o "{output_original}" "{url_video}"')\n\nif status_download != 0 or not os.path.exists(output_original):\n    print("\\n❌ ERRO CRÍTICO: O download do vídeo mestre falhou! Verifique se o link do YouTube no Passo 0 está correto.")\n    sys.exit(1)\n\nprint("\\n--- Iniciando os cortes automáticos ---")\nfor corte in config["cuts"]:\n    start_sec = para_segundos(corte["start"])\n    end_sec = para_segundos(corte["end"])\n    titulo_limpo = re.sub(r'[\\\\/*?:"<>|!]', "", corte["title"]).replace(" ", "_")\n    nome_arquivo = f"/content/Corte_{corte[\'id\']}_{titulo_limpo}.mp4"\n    print(f"Rendering: {nome_arquivo}...")\n    ffmpeg_extract_subclip(output_original, start_sec, end_sec, targetname=nome_arquivo)\n\nprint("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar.")`;
                       navigator.clipboard.writeText(pythonScript);
                       alert("Tentativa de cópia realizada! Se não funcionar, clique no texto abaixo e use Ctrl+C.");
                     }}
@@ -271,6 +271,7 @@ export default function App() {
 {`import json
 import os
 import re
+import sys
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 
 dados_payload = """${JSON.stringify({
@@ -292,9 +293,14 @@ def para_segundos(tempo_str):
     if len(partes) == 3: return partes[0] * 3600 + partes[1] * 60 + partes[2]
     return partes[0] * 60 + partes[1]
 
-if not os.path.exists(output_original):
-    print(f"📥 Baixando vídeo do YouTube...")
-    os.system(f'yt-dlp -f "best[ext=mp4]" -o "{output_original}" "{url_video}"')
+if os.path.exists(output_original):
+    os.remove(output_original)
+
+print(f"📥 Baixando vídeo do YouTube...")\nstatus_download = os.system(f'yt-dlp -f "best[ext=mp4]" -o "{output_original}" "{url_video}"')
+
+if status_download != 0 or not os.path.exists(output_original):
+    print("\\n❌ ERRO: O download falhou! Verifique o link do YouTube.")
+    sys.exit(1)
 
 print("\\n--- Iniciando os cortes automáticos ---")
 for corte in config["cuts"]:
@@ -309,7 +315,7 @@ print("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar.")`}
                   </pre>
                 </div>
               </div>
-              
+
               {/* PASSO 3: O Payload Dinâmico */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
