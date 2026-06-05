@@ -243,7 +243,7 @@ export default function App() {
                   {"!pip install yt-dlp moviepy"}
                 </pre>
               </div>
-{/* PASSO 2: O Motor em Python com JSON Injetado */}
+{/* PASSO 2: O Motor em Python com JSON Injetado (Blindado para Cópia Manual) */}
 <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Passo 2: Código do Script de Corte (Crie uma nova célula)</span>
@@ -259,38 +259,57 @@ export default function App() {
                         }))
                       }, null, 2)}\n"""\n# ==========================================\n\nconfig = json.loads(dados_payload)\nurl_video = config["videoUrl"]\noutput_original = "/content/video_completo.mp4"\n\ndef para_segundos(tempo_str):\n    partes = list(map(int, tempo_str.split(':')))\n    if len(partes) == 3: return partes[0] * 3600 + partes[1] * 60 + partes[2]\n    return partes[0] * 60 + partes[1]\n\nif not os.path.exists(output_original):\n    print(f"📥 Baixando vídeo do YouTube...")\n    os.system(f'yt-dlp -f "best[ext=mp4]" -o "{output_original}" "{url_video}"')\n\nprint("\\n--- Iniciando os cortes automáticos ---")\nfor corte in config["cuts"]:\n    start_sec = para_segundos(corte["start"])\n    end_sec = para_segundos(corte["end"])\n    titulo_limpo = re.sub(r'[\\\\/*?:"<>|!]', "", corte["title"]).replace(" ", "_")\n    nome_arquivo = f"/content/Corte_{corte[\'id\']}_{titulo_limpo}.mp4"\n    print(f"Rendering: {nome_arquivo}...")\n    ffmpeg_extract_subclip(output_original, start_sec, end_sec, targetname=nome_arquivo)\n\nprint("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar.")`;
                       navigator.clipboard.writeText(pythonScript);
-                      alert("Script Python Completo Copiado! Basta colar no Colab e rodar.");
+                      alert("Tentativa de cópia realizada! Se não funcionar, clique no texto abaixo e use Ctrl+C.");
                     }}
                     className="text-xs bg-gray-700 hover:bg-gray-600 text-cyan-400 px-2 py-1 rounded border border-gray-600 transition-colors"
                   >
                     📋 Copiar Script Python
                   </button>
                 </div>
-                <div className="bg-gray-950 p-3 rounded-lg border border-gray-900 max-h-32 overflow-y-auto">
-                <pre className="text-[11px] text-gray-400 font-mono leading-relaxed text-left">
-                    {`import json
+                <div className="relative">
+                  <pre className="bg-gray-950 p-3 rounded-lg border border-gray-900 max-h-48 overflow-y-auto text-[11px] text-gray-400 font-mono leading-relaxed text-left select-all cursor-pointer block" title="Clique para selecionar tudo e dar Ctrl+C">
+{`import json
 import os
 import re
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 
-# Os dados dos seus shorts já vão injetados aqui!
-dados_payload = """ ... """
+dados_payload = """${JSON.stringify({
+  videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=InsiraOLink",
+  cuts: clips.map((clip, index) => ({
+    id: index + 1,
+    title: clip.title,
+    start: clip.start,
+    end: clip.end
+  }))
+}, null, 2)}"""
 
 config = json.loads(dados_payload)
 url_video = config["videoUrl"]
 output_original = "/content/video_completo.mp4"
 
-# Baixa do YouTube e faz os recortes automáticos
-if not os.path.exists(output_original):
-    os.system(f'yt-dlp -f "best[ext=mp4]" ...')
+def para_segundos(tempo_str):
+    partes = list(map(int, tempo_str.split(':')))
+    if len(partes) == 3: return partes[0] * 3600 + partes[1] * 60 + partes[2]
+    return partes[0] * 60 + partes[1]
 
+if not os.path.exists(output_original):
+    print(f"📥 Baixando vídeo do YouTube...")
+    os.system(f'yt-dlp -f "best[ext=mp4]" -o "{output_original}" "{url_video}"')
+
+print("\\n--- Iniciando os cortes automáticos ---")
 for corte in config["cuts"]:
-    # Renderiza na pasta /content/ pronta para baixar
-    ffmpeg_extract_subclip(...)`}
+    start_sec = para_segundos(corte["start"])
+    end_sec = para_segundos(corte["end"])
+    titulo_limpo = re.sub(r'[\\\\/*?:"<>|!]', "", corte["title"]).replace(" ", "_")
+    nome_arquivo = f"/content/Corte_{corte['id']}_{titulo_limpo}.mp4"
+    print(f"Rendering: {nome_arquivo}...")
+    ffmpeg_extract_subclip(output_original, start_sec, end_sec, targetname=nome_arquivo)
+
+print("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar.")`}
                   </pre>
                 </div>
               </div>
-
+              
               {/* PASSO 3: O Payload Dinâmico */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
