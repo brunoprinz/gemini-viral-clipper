@@ -231,7 +231,7 @@ export default function App() {
                   <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Passo 1: Instalar Dependências no Colab</span>
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText("!pip install yt-dlp moviepy");
+                      navigator.clipboard.writeText("!pip install -U pytube moviepy");
                       alert("Passo 1 copiado!");
                     }}
                     className="text-xs bg-gray-700 hover:bg-gray-600 text-cyan-400 px-2 py-1 rounded border border-gray-600 transition-colors"
@@ -243,23 +243,24 @@ export default function App() {
                   {"!pip install yt-dlp moviepy"}
                 </pre>
               </div>
-{/* PASSO 2: O Motor em Python com JSON Injetado (Revisado) */}
+
+{/* PASSO 2: O Motor em Python com Pytube (Blindado contra Bloqueios do Colab) */}
 <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Passo 2: Código do Script de Corte (Crie uma nova célula)</span>
                   <button
                     onClick={() => {
-                      const pythonScript = `import json\nimport os\nimport re\nimport sys\nfrom moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip\n\n# ==========================================\n# 🚀 SEU JSON FOI GERADO E INJETADO AUTOMATICAMENTE AQUI\n# ==========================================\ndados_payload = """\n${JSON.stringify({
-                        videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=InsiraOLink",
+                      const pythonScript = `import json\nimport os\nimport re\nimport sys\nfrom pytube import YouTube\nfrom moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip\n\n# ==========================================\n# 🚀 SEU JSON FOI GERADO E INJETADO AUTOMATICAMENTE AQUI\n# ==========================================\ndados_payload = """\n${JSON.stringify({
+                        videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=ciQOEETOSqc",
                         cuts: clips.map((clip, index) => ({
                           id: index + 1,
                           title: clip.title,
                           start: clip.start,
                           end: clip.end
                         }))
-                      }, null, 2)}\n"""\n# ==========================================\n\nconfig = json.loads(dados_payload)\nurl_video = config["videoUrl"]\noutput_original = "/content/video_completo.mp4"\n\ndef para_segundos(tempo_str):\n    partes = list(map(int, tempo_str.split(':')))\n    if len(partes) == 3: return partes[0] * 3600 + partes[1] * 60 + partes[2]\n    return partes[0] * 60 + partes[1]\n\nif os.path.exists(output_original):\n    os.remove(output_original)\n\nprint(f"📥 Baixando vídeo do YouTube: {url_video}")\nstatus_download = os.system(f'yt-dlp -f "best[ext=mp4]" -o "{output_original}" "{url_video}"')\n\nif status_download != 0 or not os.path.exists(output_original):\n    print("\\n❌ ERRO CRÍTICO: O download do vídeo mestre falhou!")\n    sys.exit(1)\n\nprint("\\n--- Iniciando os cortes automáticos ---")\nfor corte in config["cuts"]:\n    start_sec = para_segundos(corte["start"])\n    end_sec = para_segundos(corte["end"])\n    titulo_limpo = re.sub(r'[\\\\/*?:"<>|!]', "", corte["title"]).replace(" ", "_")\n    nome_arquivo = f"/content/Corte_{corte[\'id\']}_{titulo_limpo}.mp4"\n    print(f"Rendering: {nome_arquivo}...")\n    ffmpeg_extract_subclip(output_original, start_sec, end_sec, targetname=nome_arquivo)\n\nprint("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar.")`;
+                      }, null, 2)}\n"""\n# ==========================================\n\nconfig = json.loads(dados_payload)\nurl_video = config["videoUrl"]\noutput_original = "/content/video_completo.mp4"\n\ndef para_segundos(tempo_str):\n    partes = list(map(int, tempo_str.split(':')))\n    if len(partes) == 3: return partes[0] * 3600 + partes[1] * 60 + partes[2]\n    return partes[0] * 60 + partes[1]\n\nif not os.path.exists(output_original):\n    try:\n        print(f"📥 Conectando ao YouTube via Pytube...")\n        yt = YouTube(url_video)\n        print(f"🎬 Vídeo encontrado: {yt.title}")\n        print("⏳ Baixando stream de maior resolução (MP4)...")\n        stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()\n        stream.download(output_path="/content/", filename="video_completo.mp4")\n        print("✅ Download concluído com sucesso!")\n    except Exception as e:\n        print(f"\\n❌ ERRO CRÍTICO NO DOWNLOAD: {str(e)}")\n        sys.exit(1)\nelse:\n    print("♻️ Usando vídeo mestre já existente em /content/")\n\nprint("\\n--- Iniciando os cortes automáticos ---")\nfor corte in config["cuts"]:\n    start_sec = para_segundos(corte["start"])\n    end_sec = para_segundos(corte["end"])\n    titulo_limpo = re.sub(r'[\\\\/*?:"<>|!]', "", corte["title"]).replace(" ", "_")\n    nome_arquivo = f"/content/Corte_{corte[\'id\']}_{titulo_limpo}.mp4"\n    print(f"Rendering: {nome_arquivo}...")\n    ffmpeg_extract_subclip(output_original, start_sec, end_sec, targetname=nome_arquivo)\n\nprint("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar.")`;
                       navigator.clipboard.writeText(pythonScript);
-                      alert("Tentativa de cópia realizada! Se não funcionar, clique no texto abaixo e use Ctrl+C.");
+                      alert("Script Python Atualizado Copiado! Cole no Colab.");
                     }}
                     className="text-xs bg-gray-700 hover:bg-gray-600 text-cyan-400 px-2 py-1 rounded border border-gray-600 transition-colors"
                   >
@@ -272,10 +273,11 @@ export default function App() {
 import os
 import re
 import sys
+from pytube import YouTube
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 
 dados_payload = """${JSON.stringify({
-  videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=InsiraOLink",
+  videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=ciQOEETOSqc",
   cuts: clips.map((clip, index) => ({
     id: index + 1,
     title: clip.title,
@@ -293,15 +295,17 @@ def para_segundos(tempo_str):
     if len(partes) == 3: return partes[0] * 3600 + partes[1] * 60 + partes[2]
     return partes[0] * 60 + partes[1]
 
-if os.path.exists(output_original):
-    os.remove(output_original)
-
-print(f"📥 Baixando vídeo do YouTube...")
-status_download = os.system(f'yt-dlp -f "best[ext=mp4]" -o "{output_original}" "{url_video}"')
-
-if status_download != 0 or not os.path.exists(output_original):
-    print("\\n❌ ERRO: O download falhou! Verifique o link do YouTube.")
-    sys.exit(1)
+if not os.path.exists(output_original):
+    try:
+        print(f"📥 Conectando ao YouTube via Pytube...")
+        yt = YouTube(url_video)
+        print(f"🎬 Vídeo encontrado: {yt.title}")
+        stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
+        stream.download(output_path="/content/", filename="video_completo.mp4")
+        print("✅ Download concluído!")
+    except Exception as e:
+        print(f"\\n❌ ERRO: {str(e)}")
+        sys.exit(1)
 
 print("\\n--- Iniciando os cortes automáticos ---")
 for corte in config["cuts"]:
