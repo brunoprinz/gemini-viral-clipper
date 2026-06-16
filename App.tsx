@@ -225,14 +225,14 @@ export default function App() {
                 Siga os passos abaixo para processar seus shorts na velocidade da nuvem usando o Google Colab gratuitamente.
               </p>
 
-              {/* PASSO 1: Instalação das Dependências */}
+          {/* PASSO 1: Instalação das Dependências (Atualizado para PytubeFix) */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Passo 1: Instalar Dependências no Colab</span>
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText("!pip install -U pytube moviepy");
-                      alert("Passo 1 copiado!");
+                      navigator.clipboard.writeText("!pip install pytubefix moviepy");
+                      alert("Passo 1 copiado com sucesso!");
                     }}
                     className="text-xs bg-gray-700 hover:bg-gray-600 text-cyan-400 px-2 py-1 rounded border border-gray-600 transition-colors"
                   >
@@ -240,7 +240,7 @@ export default function App() {
                   </button>
                 </div>
                 <pre className="bg-gray-950 p-3 rounded-lg text-xs text-gray-300 font-mono border border-gray-900 overflow-x-auto">
-                  {"!pip install yt-dlp moviepy"}
+                  {"!pip install pytubefix moviepy"}
                 </pre>
               </div>
 
