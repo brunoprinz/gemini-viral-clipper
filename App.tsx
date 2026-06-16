@@ -244,7 +244,7 @@ export default function App() {
                 </pre>
               </div>
 
-{/* PASSO 2: O Motor em Python com PytubeFix (Ajustado para MoviePy 2.0+) */}
+{/* PASSO 2: O Motor em Python com Chamada Posicional (À Prova de Erros do MoviePy) */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Passo 2: Código do Script de Corte (Crie uma nova célula)</span>
@@ -258,7 +258,7 @@ export default function App() {
                           start: clip.start,
                           end: clip.end
                         }))
-                      }, null, 2)}\n"""\n# ==========================================\n\nconfig = json.loads(dados_payload)\nurl_video = config["videoUrl"]\noutput_original = "/content/video_completo.mp4"\n\ndef para_segundos(tempo_str):\n    partes = list(map(int, tempo_str.split(':')))\n    if len(partes) == 3: return partes[0] * 3600 + partes[1] * 60 + partes[2]\n    return partes[0] * 60 + partes[1]\n\nif not os.path.exists(output_original):\n    try:\n        print(f"📥 Conectando ao YouTube via PytubeFix...")\n        yt = YouTube(url_video)\n        print(f"🎬 Vídeo encontrado: {yt.title}")\n        print("⏳ Baixando stream de maior resolução (MP4)...")\n        stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()\n        stream.download(output_path="/content/", filename="video_completo.mp4")\n        print("✅ Download concluído com sucesso!")\n    except Exception as e:\n        print(f"\\n❌ ERRO CRÍTICO NO DOWNLOAD: {str(e)}")\n        os._exit(1)\nelse:\n    print("♻️ Usando vídeo mestre já existente em /content/")\n\nprint("\\n--- Iniciando os cortes automáticos ---")\nfor corte in config["cuts"]:\n    start_sec = para_segundos(corte["start"])\n    end_sec = para_segundos(corte["end"])\n    titulo_limpo = re.sub(r'[\\\\/*?:"<>|!]', "", corte["title"]).replace(" ", "_")\n    nome_arquivo = f"/content/Corte_{corte[\'id\']}_{titulo_limpo}.mp4"\n    print(f"Rendering: {nome_arquivo}...")\n    # Ajustado de targetname para target_name para compatibilidade com MoviePy v2.0+\n    ffmpeg_extract_subclip(output_original, start_sec, end_sec, target_name=nome_arquivo)\n\nprint("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar.")`;
+                      }, null, 2)}\n"""\n# ==========================================\n\nconfig = json.loads(dados_payload)\nurl_video = config["videoUrl"]\noutput_original = "/content/video_completo.mp4"\n\ndef para_segundos(tempo_str):\n    partes = list(map(int, tempo_str.split(':')))\n    if len(partes) == 3: return partes[0] * 3600 + partes[1] * 60 + partes[2]\n    return partes[0] * 60 + partes[1]\n\nif not os.path.exists(output_original):\n    try:\n        print(f"📥 Conectando ao YouTube via PytubeFix...")\n        yt = YouTube(url_video)\n        print(f"🎬 Vídeo encontrado: {yt.title}")\n        print("⏳ Baixando stream de maior resolução (MP4)...")\n        stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()\n        stream.download(output_path="/content/", filename="video_completo.mp4")\n        print("✅ Download concluído com sucesso!")\n    except Exception as e:\n        print(f"\\n❌ ERRO CRÍTICO NO DOWNLOAD: {str(e)}")\n        os._exit(1)\nelse:\n    print("♻️ Usando vídeo mestre já existente em /content/")\n\nprint("\\n--- Iniciando os cortes automáticos ---")\nfor corte in config["cuts"]:\n    start_sec = para_segundos(corte["start"])\n    end_sec = para_segundos(corte["end"])\n    titulo_limpo = re.sub(r'[\\\\/*?:"<>|!]', "", corte["title"]).replace(" ", "_")\n    nome_arquivo = f"/content/Corte_{corte[\'id\']}_{titulo_limpo}.mp4"\n    print(f"Rendering: {nome_arquivo}...")\n    # Mudança posicional livre de parâmetros nomeados para evitar conflito de versão\n    ffmpeg_extract_subclip(output_original, start_sec, end_sec, nome_arquivo)\n\nprint("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar.")`;
                       navigator.clipboard.writeText(pythonScript);
                       alert("Script Python Atualizado Copiado! Cole no Colab.");
                     }}
@@ -310,12 +310,12 @@ if not os.path.exists(output_original):
 print("\\n--- Iniciando os cortes automáticos ---")
 for corte in config["cuts"]:
     start_sec = para_segundos(corte["start"])
-    end_sec = para_secongs(corte["end"])
+    end_sec = para_segundos(corte["end"])
     titulo_limpo = re.sub(r'[\\\\/*?:"<>|!]', "", corte["title"]).replace(" ", "_")
     nome_arquivo = f"/content/Corte_{corte['id']}_{titulo_limpo}.mp4"
     print(f"Rendering: {nome_arquivo}...")
-    # Mudança crucial aqui: de targetname para target_name
-    ffmpeg_extract_subclip(output_original, start_sec, end_sec, target_name=nome_arquivo)
+    # Passando os dados estritamente por ordem posicional
+    ffmpeg_extract_subclip(output_original, start_sec, end_sec, nome_arquivo)
 
 print("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar.")`}
                   </pre>
