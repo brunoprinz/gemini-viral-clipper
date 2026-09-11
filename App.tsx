@@ -249,23 +249,78 @@ export default function App() {
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Passo 2: Código do Script de Corte (Crie uma nova célula)</span>
                   <button
-                    onClick={() => {
-                      const pythonScript = `import json\nimport os\nimport re\nimport sys\nfrom pytubefix import YouTube\nfrom moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip\n\n# ==========================================\n# 🚀 SEU JSON FOI GERADO E INJETADO AUTOMATICAMENTE AQUI\n# ==========================================\ndados_payload = """\n${JSON.stringify({
-                        videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=ciQOEETOSqc",
-                        cuts: clips.map((clip, index) => ({
-                          id: index + 1,
-                          title: clip.title,
-                          start: clip.start,
-                          end: clip.end
-                        }))
-                      }, null, 2)}\n"""\n# ==========================================\n\nconfig = json.loads(dados_payload)\nurl_video = config["videoUrl"]\noutput_original = "/content/video_completo.mp4"\n\ndef para_segundos(tempo_str):\n    partes = list(map(int, tempo_str.split(':')))\n    if len(partes) == 3: return partes[0] * 3600 + partes[1] * 60 + partes[2]\n    return partes[0] * 60 + partes[1]\n\nif not os.path.exists(output_original):\n    try:\n        print(f"📥 Conectando ao YouTube via PytubeFix...")\n        yt = YouTube(url_video)\n        print(f"🎬 Vídeo encontrado: {yt.title}")\n        print("⏳ Baixando stream de maior resolução (MP4)...")\n        stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()\n        stream.download(output_path="/content/", filename="video_completo.mp4")\n        print("✅ Download concluído com sucesso!")\n    except Exception as e:\n        print(f"\\n❌ ERRO CRÍTICO NO DOWNLOAD: {str(e)}")\n        os._exit(1)\nelse:\n    print("♻️ Usando vídeo mestre já existente em /content/")\n\nprint("\\n--- Iniciando os cortes automáticos ---")\nfor corte in config["cuts"]:\n    start_sec = para_segundos(corte["start"])\n    end_sec = para_segundos(corte["end"])\n    titulo_limpo = re.sub(r'[\\\\/*?:"<>|!]', "", corte["title"]).replace(" ", "_")\n    nome_arquivo = f"/content/Corte_{corte[\'id\']}_{titulo_limpo}.mp4"\n    print(f"Rendering: {nome_arquivo}...")\n    # Chamada estritamente posicional para manter compatibilidade universal com MoviePy 1.x e 2.x\n    ffmpeg_extract_subclip(output_original, start_sec, end_sec, nome_arquivo)\n\nprint("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar.")`;
-                      navigator.clipboard.writeText(pythonScript);
-                      alert("Script Python Atualizado Copiado! Cole no Colab.");
-                    }}
-                    className="text-xs bg-gray-700 hover:bg-gray-600 text-cyan-400 px-2 py-1 rounded border border-gray-600 transition-colors"
-                  >
-                    📋 Copiar Script Python
-                  </button>
+  onClick={() => {
+    const pythonScript = `import json
+import os
+import re
+import sys
+import yt_dlp
+import warnings
+from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+
+warnings.filterwarnings("ignore", category=SyntaxWarning)
+
+# ==========================================
+# 🚀 SEU JSON FOI GERADO E INJETADO AUTOMATICAMENTE AQUI
+# ==========================================
+dados_payload = """${JSON.stringify({
+      videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=ciQOEETOSqc",
+      cuts: clips.map((clip, index) => ({
+        id: index + 1,
+        title: clip.title,
+        start: clip.start,
+        end: clip.end
+      }))
+    }, null, 2)}"""
+# ==========================================
+
+config = json.loads(dados_payload)
+url_video = config["videoUrl"]
+output_original = "/content/video_completo.mp4"
+
+def para_segundos(tempo_str):
+    partes = list(map(int, tempo_str.split(':')))
+    if len(partes) == 3: return partes[0] * 3600 + partes[1] * 60 + partes[2]
+    return partes[0] * 60 + partes[1]
+
+if not os.path.exists(output_original):
+    print(f"📥 Conectando ao YouTube via yt-dlp...")
+    
+    opcoes = {
+        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]',
+        'outtmpl': output_original,
+        'merge_output_format': 'mp4',
+        'quiet': False,
+        'no_warnings': True
+    }
+    
+    try:
+        with yt_dlp.YoutubeDL(opcoes) as ydl:
+            ydl.download([url_video])
+        print("✅ Download concluído com sucesso!")
+    except Exception as e:
+        print(f"\\n❌ ERRO CRÍTICO NO DOWNLOAD: {str(e)}")
+        sys.exit(1)
+else:
+    print("♻️ Usando vídeo mestre já existente em /content/")
+
+print("\\n--- Iniciando os cortes automáticos ---")
+for corte in config["cuts"]:
+    start_sec = para_segundos(corte["start"])
+    end_sec = para_segundos(corte["end"])
+    titulo_limpo = re.sub(r'[\\\\/*?:"<>|!]', "", corte["title"]).replace(" ", "_")
+    nome_arquivo = f"/content/Corte_{corte['id']}_{titulo_limpo}.mp4"
+    print(f"🎬 Processando: {nome_arquivo}...")
+    ffmpeg_extract_subclip(output_original, start_sec, end_sec, nome_arquivo)
+
+print("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar.")`;
+    navigator.clipboard.writeText(pythonScript);
+    alert("Script Python Atualizado Copiado! Cole no Colab.");
+  }}
+  className="text-xs bg-gray-700 hover:bg-gray-600 text-cyan-400 px-2 py-1 rounded border border-gray-600 transition-colors"
+>
+  📋 Copiar Script Python
+</button>
                 </div>
                 <div className="relative">
                   <pre className="bg-gray-950 p-3 rounded-lg border border-gray-900 max-h-48 overflow-y-auto text-[11px] text-gray-400 font-mono leading-relaxed text-left select-all cursor-pointer block" title="Clique para selecionar tudo e dar Ctrl+C">
