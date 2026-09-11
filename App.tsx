@@ -273,8 +273,11 @@ export default function App() {
 import os
 import re
 import sys
-from pytubefix import YouTube
+import yt_dlp
+import warnings
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+
+warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 dados_payload = """${JSON.stringify({
   videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=ciQOEETOSqc",
@@ -296,16 +299,25 @@ def para_segundos(tempo_str):
     return partes[0] * 60 + partes[1]
 
 if not os.path.exists(output_original):
+    print(f"📥 Conectando ao YouTube via yt-dlp...")
+    
+    opcoes = {
+        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]',
+        'outtmpl': output_original,
+        'merge_output_format': 'mp4',
+        'quiet': False,
+        'no_warnings': True
+    }
+    
     try:
-        print(f"📥 Conectando ao YouTube via PytubeFix...")
-        yt = YouTube(url_video)
-        print(f"🎬 Vídeo encontrado: {yt.title}")
-        stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
-        stream.download(output_path="/content/", filename="video_completo.mp4")
-        print("✅ Download concluído!")
+        with yt_dlp.YoutubeDL(opcoes) as ydl:
+            ydl.download([url_video])
+        print("✅ Download concluído com sucesso!")
     except Exception as e:
-        print(f"\\n❌ ERRO: {str(e)}")
-        os._exit(1)
+        print(f"\\n❌ ERRO CRÍTICO NO DOWNLOAD: {str(e)}")
+        sys.exit(1)
+else:
+    print("♻️ Usando vídeo mestre já existente em /content/")
 
 print("\\n--- Iniciando os cortes automáticos ---")
 for corte in config["cuts"]:
@@ -313,8 +325,7 @@ for corte in config["cuts"]:
     end_sec = para_segundos(corte["end"])
     titulo_limpo = re.sub(r'[\\\\/*?:"<>|!]', "", corte["title"]).replace(" ", "_")
     nome_arquivo = f"/content/Corte_{corte['id']}_{titulo_limpo}.mp4"
-    print(f"Rendering: {nome_arquivo}...")
-    # Chamada estritamente posicional (sem targetname= ou target_name=)
+    print(f"🎬 Processando: {nome_arquivo}...")
     ffmpeg_extract_subclip(output_original, start_sec, end_sec, nome_arquivo)
 
 print("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar.")`}
