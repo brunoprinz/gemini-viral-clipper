@@ -231,7 +231,7 @@ export default function App() {
                   <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Passo 1: Instalar Dependências no Colab</span>
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText("!pip install pytubefix moviepy");
+                      navigator.clipboard.writeText("!pip install yt-dlp moviepy");
                       alert("Passo 1 copiado com sucesso!");
                     }}
                     className="text-xs bg-gray-700 hover:bg-gray-600 text-cyan-400 px-2 py-1 rounded border border-gray-600 transition-colors"
@@ -240,7 +240,7 @@ export default function App() {
                   </button>
                 </div>
                 <pre className="bg-gray-950 p-3 rounded-lg text-xs text-gray-300 font-mono border border-gray-900 overflow-x-auto">
-                  {"!pip install pytubefix moviepy"}
+                  {"!pip install yt-dlp moviepy"}
                 </pre>
               </div>
 
