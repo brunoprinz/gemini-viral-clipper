@@ -263,7 +263,7 @@ warnings.filterwarnings("ignore", category=SyntaxWarning)
 # ==========================================
 # 🚀 SEU JSON FOI GERADO E INJETADO AUTOMATICAMENTE AQUI
 # ==========================================
-dados_payload = """${JSON.stringify({
+dados_payload = r"""${JSON.stringify({
       videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=ciQOEETOSqc",
       cuts: clips.map((clip, index) => ({
         id: index + 1,
@@ -334,8 +334,8 @@ from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 
 warnings.filterwarnings("ignore", category=SyntaxWarning)
 
-dados_payload = """${JSON.stringify({
-  videoUrl: youtubeUrlInput || "https://www.youtube.com/watch?v=ciQOEETOSqc",
+dados_payload = r"""${JSON.stringify({
+  videoUrl: youtubeUrlInput.trim() || "https://www.youtube.com/watch?v=ciQOEETOSqc",
   cuts: clips.map((clip, index) => ({
     id: index + 1,
     title: clip.title,
