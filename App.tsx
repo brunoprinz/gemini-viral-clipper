@@ -357,12 +357,13 @@ if not os.path.exists(output_original):
     print(f"📥 Conectando ao YouTube via yt-dlp...")
     
     opcoes = {
-        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]',
-        'outtmpl': output_original,
-        'merge_output_format': 'mp4',
-        'quiet': False,
-        'no_warnings': True
-    }
+      'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]',
+      'outtmpl': output_original,
+      'merge_output_format': 'mp4',
+      'quiet': False,
+      'no_warnings': True,
+      'extractor_args': {'youtube': ['player_client=android']}
+  }
     
     try:
         with yt_dlp.YoutubeDL(opcoes) as ydl:
