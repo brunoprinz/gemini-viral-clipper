@@ -251,69 +251,72 @@ export default function App() {
                   <button
   onClick={() => {
     const pythonScript = `import json
-    import os
-    import re
-    import sys
-    import warnings
-    from pytubefix import YouTube
-    from pytubefix.cli import on_progress
-    from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+import os
+import re
+import sys
+import warnings
+from pytubefix import YouTube
+from pytubefix.cli import on_progress
+from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+
+warnings.filterwarnings("ignore", category=SyntaxWarning)
+
+# ==========================================
+# 🚀 SEU JSON FOI GERADO E INJETADO AUTOMATICAMENTE AQUI
+# ==========================================
+dados_payload = r"""\${JSON.stringify({
+      videoUrl: youtubeUrlInput.trim() || "https://www.youtube.com/watch?v=ciQOEETOSqc",
+      cuts: clips.map((clip, index) => ({
+        id: index + 1,
+        title: clip.title,
+        start: clip.start,
+        end: clip.end
+      }))
+    }, null, 2)}"""
+# ==========================================
+
+config = json.loads(dados_payload)
+url_video = config["videoUrl"]
+output_original = "/content/video_completo.mp4"
+
+def para_segundos(tempo_str):
+    partes = list(map(int, tempo_str.split(':')))
+    if len(partes) == 3: return partes[0] * 3600 + partes[1] * 60 + partes[2]
+    return partes[0] * 60 + partes[1]
+
+if not os.path.exists(output_original):
+    print(f"📥 Conectando ao YouTube via PytubeFix (Modo Stealth)...")
+    try:
+        # Usa o cliente de Realidade Virtual do Android para burlar o block de bots
+        yt = YouTube(url_video, on_progress_callback=on_progress, client='ANDROID_VR')
+        print(f"🎬 Vídeo Encontrado: {yt.title}")
+        
+        # Pega a melhor resolução com áudio embutido
+        stream = yt.streams.get_highest_resolution()
+        print("⏳ A baixar vídeo mestre (isso pode demorar uns minutos)...")
+        stream.download(output_path='/content/', filename='video_completo.mp4')
+        print("✅ Download concluído com sucesso!")
+        
+    except Exception as e:
+        print(f"\\n❌ ERRO CRÍTICO NO DOWNLOAD: {str(e)}")
+        print("DICA: Se o erro for de autenticação, o YouTube bloqueou temporariamente os IPs do Colab. Tente novamente em algumas horas ou tente outro vídeo.")
+        sys.exit(1)
+else:
+    print("♻️ Usando vídeo mestre já existente em /content/")
+
+print("\\n--- Iniciando os cortes automáticos ---")
+for corte in config["cuts"]:
+    start_sec = para_segundos(corte["start"])
+    end_sec = para_segundos(corte["end"])
+    titulo_limpo = re.sub(r'[\\\\/*?:"<>|!]', "", corte["title"]).replace(" ", "_")
+    nome_arquivo = f"/content/Corte_{corte['id']}_{titulo_limpo}.mp4"
+    print(f"✂️ Processando: {nome_arquivo}...")
+    ffmpeg_extract_subclip(output_original, start_sec, end_sec, nome_arquivo)
+
+print("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar os cortes.")`;
     
-    warnings.filterwarnings("ignore", category=SyntaxWarning)
-    
-    # ==========================================
-    # 🚀 SEU JSON FOI GERADO E INJETADO AUTOMATICAMENTE AQUI
-    # ==========================================
-    dados_payload = r"""${JSON.stringify({
-          videoUrl: youtubeUrlInput.trim() || "https://www.youtube.com/watch?v=ciQOEETOSqc",
-          cuts: clips.map((clip, index) => ({
-            id: index + 1,
-            title: clip.title,
-            start: clip.start,
-            end: clip.end
-          }))
-        }, null, 2)}"""
-    # ==========================================
-    
-    config = json.loads(dados_payload)
-    url_video = config["videoUrl"]
-    output_original = "/content/video_completo.mp4"
-    
-    def para_segundos(tempo_str):
-        partes = list(map(int, tempo_str.split(':')))
-        if len(partes) == 3: return partes[0] * 3600 + partes[1] * 60 + partes[2]
-        return partes[0] * 60 + partes[1]
-    
-    if not os.path.exists(output_original):
-        print(f"📥 Conectando ao YouTube via PytubeFix (Modo Stealth)...")
-        try:
-            # Usa o cliente de Realidade Virtual do Android para burlar o block de bots
-            yt = YouTube(url_video, on_progress_callback=on_progress, client='ANDROID_VR')
-            print(f"🎬 Vídeo Encontrado: {yt.title}")
-            
-            # Pega a melhor resolução com áudio embutido
-            stream = yt.streams.get_highest_resolution()
-            print("⏳ A baixar vídeo mestre (isso pode demorar uns minutos)...")
-            stream.download(output_path='/content/', filename='video_completo.mp4')
-            print("✅ Download concluído com sucesso!")
-            
-        except Exception as e:
-            print(f"\\n❌ ERRO CRÍTICO NO DOWNLOAD: {str(e)}")
-            print("DICA: Se o erro for de autenticação, o YouTube bloqueou temporariamente os IPs do Colab. Tente novamente em algumas horas ou tente outro vídeo.")
-            sys.exit(1)
-    else:
-        print("♻️ Usando vídeo mestre já existente em /content/")
-    
-    print("\\n--- Iniciando os cortes automáticos ---")
-    for corte in config["cuts"]:
-        start_sec = para_segundos(corte["start"])
-        end_sec = para_segundos(corte["end"])
-        titulo_limpo = re.sub(r'[\\\\/*?:"<>|!]', "", corte["title"]).replace(" ", "_")
-        nome_arquivo = f"/content/Corte_{corte['id']}_{titulo_limpo}.mp4"
-        print(f"✂️ Processando: {nome_arquivo}...")
-        ffmpeg_extract_subclip(output_original, start_sec, end_sec, nome_arquivo)
-    
-    print("\\n🚀 Sucesso! Atualize a pasta lateral do Colab para baixar os cortes.");
+    navigator.clipboard.writeText(pythonScript);
+    alert("Script Python copiado com sucesso!");
   }}
   className="text-xs bg-gray-700 hover:bg-gray-600 text-cyan-400 px-2 py-1 rounded border border-gray-600 transition-colors"
 >
