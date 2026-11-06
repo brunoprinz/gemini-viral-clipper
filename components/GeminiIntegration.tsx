@@ -4,22 +4,27 @@ import { Copy, ExternalLink, Check } from 'lucide-react';
 export const GeminiIntegration: React.FC = () => {
   const [copied, setCopied] = useState(false);
 
-  const promptText = `Analyze the uploaded video for viral potential and behavioral engagement. 
-Identify 3-5 segments that:
-1. Have a high "Retenção Inicial" (strong hooks/curiosity).
-2. Generate a "Social Gap" (moments that naturally make people want to comment or ask questions).
-3. Contain complete, provocative thoughts that stand alone as a Short/Reel.
+  const promptText = `Analyze this video for viral potential and behavioral engagement. Identify 3 to 7 standalone segments that work perfectly as viral Shorts or Reels.
 
-For each segment, create a "Click-Ready" title and a description explaining why this will trigger engagement.
+CRITICAL RULE FOR TIMESTAMPS:
+- Every segment MUST have a complete, self-contained narrative arc. 
+- The `end` timestamp MUST coincide strictly with the complete end of a full sentence, a concluded thought, or a natural thematic resolution. 
+- NEVER cut a sentence mid-way, never leave a phrase hanging, and never cut off a story before its immediate micro-resolution or payoff, unless explicitly requested.
 
-Return strictly a JSON array with no markdown formatting, no code blocks, and no extra text. 
+For each segment, identify:
+1. A high "Retenção Inicial" hook (strong immediate impact to stop the scroll in the first seconds).
+2. A "Social Gap" or curiosity factor that drives engagement, identification, or comments.
+3. A complete, provocative thought that stands alone without needing prior context.
+
+Return strictly a valid JSON array with no markdown formatting, no code blocks, and no extra text outside the JSON structure. 
+
 The JSON structure must be exactly:
 [
   {
-    "title": "Viral Headline",
+    "title": "Catchy Click-Ready Viral Headline in Portuguese",
     "start": "MM:SS",
     "end": "MM:SS",
-    "description": "Behavioral trigger: Why people will interact with this"
+    "description": "Explicação detalhada contendo: 1. Qual gatilho psicológico está presente. 2. Por que ele gera retenção. 3. Qual o melhor estilo de abertura/gancho para o short."
   }
 ]`;
 
