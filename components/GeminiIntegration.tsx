@@ -8,7 +8,7 @@ export const GeminiIntegration: React.FC = () => {
 
 CRITICAL RULE FOR TIMESTAMPS:
 - Every segment MUST have a complete, self-contained narrative arc. 
-- The `end` timestamp MUST coincide strictly with the complete end of a full sentence, a concluded thought, or a natural thematic resolution. 
+- The \`end\` timestamp MUST coincide strictly with the complete end of a full sentence, a concluded thought, or a natural thematic resolution. 
 - NEVER cut a sentence mid-way, never leave a phrase hanging, and never cut off a story before its immediate micro-resolution or payoff, unless explicitly requested.
 
 For each segment, identify:
